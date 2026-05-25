@@ -105,7 +105,7 @@ def scrape_detail(driver, url, retries=RETRIES):
     }
 
 
-def scrape_books(headless=HEADLESS):
+def scrape_books(headless=HEADLESS, limit=None):
     driver = create_driver(headless=headless)
 
     try:
@@ -115,6 +115,8 @@ def scrape_books(headless=HEADLESS):
         books = []
 
         for index, url in enumerate(product_urls, start=1):
+            if limit and index > limit:
+                break
             logging.info(f"Scraping {index}/{len(product_urls)}: {url}")
             book = scrape_detail(driver, url)
             books.append(book)
