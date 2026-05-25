@@ -55,3 +55,6 @@ tests/test_scraper.py::test_book_has_required_keys PASSED [100%]
 2026-05-22 19:31:53,001 - INFO - Collected URLs: 60
 ```
 
+## License
+
+MIT License
