@@ -4,11 +4,18 @@ from time import sleep
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
-from config import BASE_URL, CHROMEDRIVER_PATH, HEADLESS, TIMEOUT, RETRIES, LOG_PATH
+from config import (
+    BASE_URL,
+    CHROMEDRIVER_PATH,
+    HEADLESS,
+    RETRIES,
+    LOG_PATH,
+)
+
+from pages.home_page import HomePage
+from pages.book_page import BookPage
+
 
 logging.basicConfig(
     filename=LOG_PATH,
@@ -29,63 +36,44 @@ def create_driver(headless=HEADLESS):
     return webdriver.Chrome(service=service, options=options)
 
 
-def wait_for_books(driver):
-    return WebDriverWait(driver, TIMEOUT).until(
-        EC.presence_of_all_elements_located((By.CLASS_NAME, "product_pod"))
-    )
-
-
 def collect_product_urls(driver):
-    driver.get(BASE_URL)
+    home_page = HomePage(driver)
+    home_page.open(BASE_URL)
 
     urls = []
 
     while True:
-        wait_for_books(driver)
-
-        books = driver.find_elements(By.CLASS_NAME, "product_pod")
+        books = home_page.get_book_elements()
 
         for book in books:
-            url = book.find_element(By.CSS_SELECTOR, "h3 a").get_attribute("href")
+            url = book.find_element("css selector", "h3 a").get_attribute("href")
             urls.append(url)
 
         logging.info(f"Collected URLs: {len(urls)}")
 
-        next_buttons = driver.find_elements(By.CSS_SELECTOR, ".next a")
+        next_url = home_page.get_next_page_url()
 
-        if not next_buttons:
+        if not next_url:
             break
 
-        next_url = next_buttons[0].get_attribute("href")
-        driver.get(next_url)
+        home_page.open(next_url)
 
     return urls
 
 
 def scrape_detail(driver, url, retries=RETRIES):
+    book_page = BookPage(driver)
+
     for attempt in range(1, retries + 1):
         try:
-            driver.get(url)
-
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".product_main h1"))
-            )
-
-            title = driver.find_element(By.CSS_SELECTOR, ".product_main h1").text
-            price = driver.find_element(By.CLASS_NAME, "price_color").text
-            stock = driver.find_element(By.CLASS_NAME, "instock").text.strip()
-
-            rating_element = driver.find_element(By.CLASS_NAME, "star-rating")
-            rating = rating_element.get_attribute("class").split()[-1]
-
-            category = driver.find_elements(By.CSS_SELECTOR, ".breadcrumb a")[2].text
+            book_page.open(url)
 
             return {
-                "title": title,
-                "price": price,
-                "stock": stock,
-                "rating": rating,
-                "category": category,
+                "title": book_page.get_title(),
+                "price": book_page.get_price(),
+                "stock": book_page.get_stock(),
+                "rating": book_page.get_rating(),
+                "category": book_page.get_category(),
                 "url": url,
             }
 
@@ -117,9 +105,9 @@ def scrape_books(headless=HEADLESS, limit=None):
         for index, url in enumerate(product_urls, start=1):
             if limit and index > limit:
                 break
+
             logging.info(f"Scraping {index}/{len(product_urls)}: {url}")
-            book = scrape_detail(driver, url)
-            books.append(book)
+            books.append(scrape_detail(driver, url))
 
         return books
 
