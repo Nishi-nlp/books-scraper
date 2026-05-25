@@ -20,13 +20,17 @@ A Selenium-based web scraping project using Page Object Model (POM).
 - pytest
 - pandas
 
+
 ## Run
 
 ```bash
 uv run python src/main.py
+```
+
 
 ## Sample Output
-![CSV Output](images/sample_output.png)
+
+![CSV Output](./images/sample_output.png)
 
 
 ## Test
