@@ -12,6 +12,7 @@ A Selenium-based web scraping project using Page Object Model (POM).
 - Pytest tests
 - Headless mode
 - Page Object Model architecture
+- Docker support
 
 ## Tech Stack
 
@@ -24,7 +25,8 @@ A Selenium-based web scraping project using Page Object Model (POM).
 ## Run
 
 ```bash
-uv run python src/main.py
+docker build -t books-scraper .
+docker run --rm -v ${PWD}/data:/app/data books-scraper
 ```
 
 

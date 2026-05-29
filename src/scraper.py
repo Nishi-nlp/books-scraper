@@ -7,7 +7,6 @@ from selenium.webdriver.chrome.service import Service
 
 from config import (
     BASE_URL,
-    CHROMEDRIVER_PATH,
     HEADLESS,
     RETRIES,
     LOG_PATH,
@@ -31,9 +30,10 @@ def create_driver(headless=HEADLESS):
         options.add_argument("--headless=new")
 
     options.add_argument("--window-size=1280,900")
-
-    service = Service(CHROMEDRIVER_PATH)
-    return webdriver.Chrome(service=service, options=options)
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    return webdriver.Chrome(options=options)
 
 
 def collect_product_urls(driver):

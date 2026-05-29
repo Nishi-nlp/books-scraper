@@ -2,7 +2,6 @@ from pathlib import Path
 
 
 BASE_URL = "https://books.toscrape.com/"
-CHROMEDRIVER_PATH = r"C:\chromedriver-win64\chromedriver.exe"
 
 HEADLESS = True
 TIMEOUT = 10
