@@ -10,11 +10,13 @@ from config import (
     HEADLESS,
     RETRIES,
     LOG_PATH,
+    LOG_DIR
 )
 
 from pages.home_page import HomePage
 from pages.book_page import BookPage
 
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     filename=LOG_PATH,
