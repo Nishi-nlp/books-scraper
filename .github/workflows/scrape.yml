@@ -1,0 +1,26 @@
+name: Run Books Scraper
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t books-scraper .
+
+      - name: Run scraper
+        run: |
+          mkdir -p data
+          docker run --rm -v ${{ github.workspace }}/data:/app/data books-scraper
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: books-data
+          path: data/
